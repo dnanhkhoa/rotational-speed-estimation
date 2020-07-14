@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, user-scalable=no">
+    <meta name="HandheldFriendly" content="true">
+    <title>Sensor Tracking</title>
+    <style>
+        body {
+            overflow: hidden;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        td {
+            border: 1px solid black;
+            width: 50%;
+            padding: 20px;
+            text-align: right;
+        }
+
+        caption {
+            height: 25px;
+            margin-bottom: 10px;
+        }
+
+        button {
+            height: 50px;
+            width: 100%;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <table>
+            <caption id="caption">Number of data points: 0</caption>
+            <tr>
+                <td>Orientation</td>
+                <td><span id="orientation">0</span><span>&deg;</span></td>
+            </tr>
+            <tr>
+                <td>Angular velocity</td>
+                <td><span id="velocity">0</span><span>&deg;/s</span></td>
+            </tr>
+        </table>
+        <button id="button">Track</button>
+    </main>
+    <script>
+        let is_tracking = false;
+
+        let num_data_points = 0;
+        let data_points = [];
+
+        let button = document.getElementById("button");
+
+        function set_value(field_name, value) {
+            if (value != null) {
+                document.getElementById(field_name).innerHTML = value;
+            }
+        }
+
+        function cleanup() {
+            num_data_points = 0;
+            data_points = [];
+        }
+
+        function upload_data_points() {
+            // Service: https://pipedream.com
+            const url = "https://537c7340c3be868e56f53fe92dd04a73.m.pipedream.net";
+
+            const options = {
+                method: "POST",
+                mode: "cors",
+                body: JSON.stringify(data_points),
+            };
+
+            fetch(url, options).then(() => {
+                alert("Uploaded data points");
+            }).catch(err => {
+                alert(err.message);
+            }).finally(() => {
+                cleanup();
+            });
+        }
+
+        button.onclick = function (e) {
+            e.preventDefault();
+
+            if (is_tracking) {
+                button.innerHTML = "Track";
+
+                upload_data_points();
+            } else {
+                button.innerHTML = "Stop and Upload";
+            }
+
+            is_tracking = !is_tracking;
+        };
+
+        document.addEventListener("touchmove", function (e) {
+            if (e.scale !== 1) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+    </script>
+</body>
+
+</html>
